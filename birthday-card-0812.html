@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>給儒儒的信</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:#FBF6EC;
+    --paper-back:#F0E6D2;
+    --ink:#4A4238;
+    --ink-soft:#7A7062;
+    --coral:#E2725B;
+    --sage:#8FA783;
+    --blue:#7C93B0;
+    --blush:#E7ABA6;
+    --gold:#D9A441;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;height:100%;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Noto Sans TC',sans-serif;
+    overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
+    user-select:none;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;mix-blend-mode:multiply;
+    background-image:
+      radial-gradient(ellipse at 20% 20%, rgba(217,164,65,0.06), transparent 60%),
+      radial-gradient(ellipse at 80% 80%, rgba(124,147,176,0.06), transparent 60%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/></svg>");
+    z-index:9999;
+  }
+  .caveat{font-family:'Caveat',cursive;}
+  .brush{font-family:'Caveat','Noto Sans TC',sans-serif;}
+
+  /* ---------- LOCK / MAIL SCREEN ---------- */
+  #lock{
+    position:fixed;inset:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:24px;
+    transition:opacity .6s ease;
+  }
+  #lock.hide{opacity:0;pointer-events:none;}
+  .lock-title{font-family:'Caveat','Noto Sans TC',sans-serif;font-size:2.8rem;color:var(--coral);margin-bottom:6px;cursor:default;}
+  .lock-sub{font-family:'Noto Sans TC',sans-serif;font-size:1.15rem;color:var(--ink-soft);letter-spacing:.03em;margin-bottom:18px;min-height:1.2em;}
+
+  .countdown{display:flex;gap:14px;margin-bottom:22px;}
+  .countdown div{display:flex;flex-direction:column;align-items:center;}
+  .countdown .num{font-family:'Caveat',cursive;font-weight:700;font-size:2.4rem;color:var(--ink);line-height:1;}
+  .countdown .lbl{font-size:.68rem;color:var(--ink-soft);margin-top:2px;}
+
+  #arrival{display:none;flex-direction:column;align-items:center;margin-bottom:10px;}
+  .arrived-text{font-family:'Caveat','Noto Sans TC',sans-serif;font-size:2rem;color:var(--coral);margin-top:8px;}
+
+  .unlock-btn{
+    font-family:'Caveat','Noto Sans TC',sans-serif;font-size:1.5rem;
+    background:var(--coral);color:var(--paper);border:none;border-radius:60px;
+    padding:13px 40px;box-shadow:0 6px 0 rgba(74,66,56,0.25);cursor:pointer;
+    transition:transform .15s ease;display:none;
+  }
+  .unlock-btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(74,66,56,0.25);}
+  .preview-note{font-size:.65rem;color:#aaa;margin-top:14px;max-width:240px;line-height:1.5;}
+
+  /* ---------- BOOK ---------- */
+  #book-wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .5s ease;}
+  #book-wrap.show{opacity:1;visibility:visible;}
+  #stage{position:relative;width:min(92vw,420px);height:min(78vh,620px);perspective:2200px;}
+  .page{position:absolute;inset:0;transform-origin:left center;transform-style:preserve-3d;transition:transform .85s cubic-bezier(.45,.05,.2,1);will-change:transform;}
+  .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;background:var(--paper);
+    box-shadow:0 10px 30px rgba(74,66,56,.18), 0 2px 0 rgba(74,66,56,.05) inset;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 26px;text-align:center;
+    border:1px solid rgba(74,66,56,.08);}
+  .face.back{transform:rotateY(180deg);background:var(--paper-back);}
+  .doodle{width:96px;height:96px;margin-bottom:18px;}
+  .ptitle{font-family:'Caveat','Noto Sans TC',sans-serif;font-weight:400;font-size:1.9rem;margin-bottom:14px;letter-spacing:.03em;}
+  .ptext{font-family:'Noto Sans TC',sans-serif;font-size:1.35rem;line-height:2.15;color:var(--ink);letter-spacing:.04em;}
+  .pnum{position:absolute;bottom:14px;right:20px;font-family:'Caveat',cursive;font-size:.95rem;color:var(--ink-soft);}
+  .corner-mark{position:absolute;top:14px;left:18px;width:20px;height:20px;color:rgba(74,66,56,.35);}
+
+  .cover .ptitle{font-size:2.2rem;color:var(--coral);}
+  .cover .ptext{font-size:1rem;color:var(--ink-soft);}
+  .final .face{background:linear-gradient(180deg,var(--paper) 60%, #F5E6D8);}
+  .final .ptext{font-family:'Caveat','Noto Sans TC',sans-serif;font-size:2.6rem;line-height:1.95;color:var(--ink);}
+
+  /* 照片頁 */
+  .face.has-photo{padding:0;}
+  .page-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:13px;}
+  .photo-caption{
+    position:absolute;left:0;right:0;bottom:0;
+    padding:26px 22px 24px;
+    background:linear-gradient(to top, rgba(30,26,20,0.72) 0%, rgba(30,26,20,0.32) 55%, rgba(30,26,20,0) 100%);
+    border-radius:0 0 13px 13px;
+  }
+  .photo-caption .ptitle{color:#FBF6EC;margin-bottom:8px;}
+  .photo-caption .ptext{color:#FBF6EC;font-size:.98rem;line-height:1.85;text-shadow:0 1px 4px rgba(0,0,0,.35);}
+  .has-photo .pnum{color:#FBF6EC;text-shadow:0 1px 4px rgba(0,0,0,.4);}
+  .cover.has-photo .ptitle{color:#FBF6EC;}
+
+  .big-line1{font-family:'Caveat','Noto Sans TC',sans-serif;font-size:1.5rem;color:var(--ink-soft);opacity:.75;margin-bottom:22px;letter-spacing:.05em;}
+  .big-line2{font-family:'Caveat','Noto Sans TC',sans-serif;font-size:3.2rem;color:var(--coral);line-height:1.4;letter-spacing:.03em;}
+  .big-line1 .hw-ch, .big-line2 .hw-ch{animation-name:hwIn;}
+
+  /* handwriting reveal */
+  .hw-ch{display:inline-block;opacity:0;transform:translateY(8px) rotate(-4deg);
+    animation:hwIn .4s ease forwards;animation-play-state:paused;}
+  .go .hw-ch{animation-play-state:running;}
+  @keyframes hwIn{to{opacity:1;transform:none;}}
+
+  #dots{position:fixed;bottom:18px;left:0;right:0;display:flex;justify-content:center;gap:7px;z-index:60;}
+  #dots span{width:6px;height:6px;border-radius:50%;background:rgba(74,66,56,.25);transition:background .3s ease, transform .3s ease;}
+  #dots span.active{background:var(--coral);transform:scale(1.4);}
+  .hint{position:fixed;top:16px;left:0;right:0;text-align:center;font-family:'Caveat',cursive;color:var(--ink-soft);font-size:1rem;opacity:.8;z-index:60;pointer-events:none;transition:opacity .5s ease;}
+
+  .confetti{position:fixed;inset:0;pointer-events:none;z-index:40;overflow:hidden;}
+  .confetti i{position:absolute;top:-20px;font-size:1.1rem;animation:fall linear forwards;opacity:.85;}
+  @keyframes fall{to{transform:translateY(110vh) rotate(300deg);opacity:.2;}}
+
+  .replay{margin-top:16px;font-family:'Caveat','Noto Sans TC',sans-serif;font-size:1.15rem;color:var(--blue);background:none;border:none;text-decoration:underline;cursor:pointer;}
+  .photo-caption .replay{color:#FBF6EC;}
+  .replay-floating{
+    position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
+    background:rgba(30,26,20,0.45);padding:6px 16px;border-radius:20px;
+    text-decoration:none;color:#FBF6EC;
+  }
+
+  #soundBtn{
+    position:fixed;left:18px;bottom:18px;z-index:70;
+    width:44px;height:44px;border-radius:50%;
+    background:var(--paper);border:1px solid rgba(74,66,56,.15);
+    box-shadow:0 4px 14px rgba(74,66,56,.18);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;opacity:0;pointer-events:none;transition:opacity .4s ease;
+  }
+  #soundBtn.show{opacity:1;pointer-events:auto;}
+  #soundBtn svg{width:22px;height:22px;color:var(--ink);}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <filter id="pencil" x="-20%" y="-20%" width="140%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="noise"/>
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.6"/>
+  </filter>
+</svg>
+
+<!-- ============ LOCK / MAIL SCREEN ============ -->
+<div id="lock">
+  <div class="lock-title" id="lockTitle">生日倒數</div>
+  <div class="lock-sub" id="lockSub">還沒到時間喔</div>
+
+  <div class="countdown" id="countdown"></div>
+
+  <div id="arrival">
+    <div class="arrived-text">時間到了！</div>
+  </div>
+
+  <button class="unlock-btn" id="unlockBtn">拆 開 這 封 信</button>
+  <div class="preview-note" id="previewNote"></div>
+</div>
+
+<!-- ============ BOOK ============ -->
+<div id="book-wrap">
+  <div class="hint" id="hint">左右滑動 / 點兩側翻頁</div>
+  <div id="stage"></div>
+  <div id="dots"></div>
+</div>
+
+<button id="soundBtn" aria-label="切換音樂">
+  <svg id="soundIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="3 9 9 9 13 5 13 19 9 15 3 15 3 9"></polygon>
+    <path id="wave1" d="M16.5 8.5a5 5 0 0 1 0 7"></path>
+    <path id="wave2" d="M19 6a9 9 0 0 1 0 12"></path>
+  </svg>
+</button>
+
+<!--
+  背景音樂設定：
+  1. 把你的音樂檔重新命名成 BGM.mp3
+  2. 放在跟這個 html 檔「同一個資料夾」裡
+  3. 傳給對方時，兩個檔案要一起傳（例如打包成 zip，或用支援多檔案的方式傳送）
+  如果沒有放 BGM.mp3，音樂按鈕會自動隱藏，其他功能不受影響。
+-->
+<audio id="bgm" src="BGM.mp3" loop preload="auto"></audio>
+
+<script>
+/* ---------------- 日期鎖定 ---------------- */
+const target = new Date('2026-08-12T00:00:00+08:00').getTime();
+let arrived = false;
+
+function pad(n){return n.toString().padStart(2,'0');}
+
+function renderCountdown(){
+  if(arrived) return;
+  const diff = target - Date.now();
+  if(diff <= 0){ triggerArrival(); return; }
+  const d = Math.floor(diff/86400000);
+  const h = Math.floor(diff%86400000/3600000);
+  const m = Math.floor(diff%3600000/60000);
+  const s = Math.floor(diff%60000/1000);
+  document.getElementById('countdown').innerHTML =
+    '<div><span class="num">'+d+'</span><span class="lbl">天</span></div>'+
+    '<div><span class="num">'+pad(h)+'</span><span class="lbl">時</span></div>'+
+    '<div><span class="num">'+pad(m)+'</span><span class="lbl">分</span></div>'+
+    '<div><span class="num">'+pad(s)+'</span><span class="lbl">秒</span></div>';
+}
+renderCountdown();
+setInterval(renderCountdown,1000);
+
+function triggerArrival(){
+  arrived = true;
+  document.getElementById('countdown').style.display='none';
+  document.getElementById('lockSub').style.display='none';
+  document.getElementById('arrival').style.display='flex';
+  setTimeout(()=>{ document.getElementById('unlockBtn').style.display='inline-block'; }, 500);
+}
+
+/* ---------------- 預覽模式（自己檢查內容用） ----------------
+   方法一：網址後面加上 ?preview=1
+   方法二：連續點「生日倒數」四個字 5 下
+------------------------------------------------------------ */
+function enterPreview(){
+  if(arrived) return;
+  arrived = true;
+  document.getElementById('countdown').style.display='none';
+  document.getElementById('lockSub').style.display='none';
+  document.getElementById('unlockBtn').style.display='inline-block';
+  document.getElementById('previewNote').textContent = '（目前是預覽模式，收件人不會看到這行字，但寄出前記得移除網址上的 ?preview=1）';
+}
+const urlParams = new URLSearchParams(location.search);
+if(urlParams.get('preview')==='1'){ enterPreview(); }
+
+let tapCount=0, tapTimer=null;
+document.getElementById('lockTitle').addEventListener('click', ()=>{
+  tapCount++;
+  clearTimeout(tapTimer);
+  tapTimer=setTimeout(()=>{tapCount=0;},1500);
+  if(tapCount>=5){ tapCount=0; enterPreview(); }
+});
+
+document.getElementById('unlockBtn').addEventListener('click', ()=>{
+  document.getElementById('lock').classList.add('hide');
+  setTimeout(()=>{
+    document.getElementById('lock').style.display='none';
+    document.getElementById('book-wrap').classList.add('show');
+    activatePage(0);
+    setTimeout(()=>{document.getElementById('hint').style.opacity='0';},2600);
+  },600);
+  playBgm();
+});
+
+/* ---------------- 背景音樂 ---------------- */
+const bgm = document.getElementById('bgm');
+const soundBtn = document.getElementById('soundBtn');
+let bgmReady = false;
+
+bgm.addEventListener('canplaythrough', ()=>{ bgmReady = true; soundBtn.classList.add('show'); }, {once:true});
+bgm.addEventListener('error', ()=>{ soundBtn.classList.remove('show'); });
+
+function playBgm(){
+  bgm.volume = 0.6;
+  bgm.play().then(()=>{
+    soundBtn.classList.add('show');
+    setSoundIcon(true);
+  }).catch(()=>{ /* 檔案不存在或瀏覽器擋自動播放，忽略即可 */ });
+}
+
+function setSoundIcon(playing){
+  document.getElementById('wave1').style.display = playing? '' : 'none';
+  document.getElementById('wave2').style.display = playing? '' : 'none';
+}
+
+soundBtn.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  if(bgm.paused){ bgm.play(); setSoundIcon(true); }
+  else { bgm.pause(); setSoundIcon(false); }
+});
+
+/* ---------------- 手寫動畫工具 ---------------- */
+function handwriteHTML(text){
+  if(!text) return '';
+  let i=0;
+  return text.split('\n').map(line=>{
+    return [...line].map(ch=>{
+      if(ch===' '){ i++; return ' '; }
+      const delay = (i*0.045).toFixed(3);
+      i++;
+      return '<span class="hw-ch" style="animation-delay:'+delay+'s">'+ch+'</span>';
+    }).join('');
+  }).join('<br>');
+}
+
+/* ---------------- 內容資料 ---------------- */
+const pages = [
+  { cls:'cover',
+    img:'./asset/cover.png',
+    title:'To 儒儒',
+    text:'2026 . 08 . 12\n\n打開的這一刻起\n生日快樂' },
+
+  { img:'./asset/page1.png',
+    title:'手錶',
+    text:'回台灣的時候\n注意到你的錶面都碎了\n跟當時候的你一樣\n\n雖然中國人忌諱時鐘\n但我卻想把我的時間\n給你' },
+
+  { img:'./asset/page2.png',
+    title:'黃山料說',
+    text:'「成年人的世界裡\n人人各自奔波忙碌\n你願意把時間花在誰身上\n就是對他最直接的愛了。」\n\n聽起來真噁心\n但也卻是我最真實的想法' },
+
+  { big:['那天不是聊到說','喜歡你什麼嗎？'] },
+
+  { img:'./asset/page4.png',
+    title:'',
+    text:'我喜歡你的生活\n認真的態度\n不管是打造自己喜歡的環境\n或者是有自己的理想' },
+
+  { img:'./asset/page5.png',
+    title:'',
+    text:'也很喜歡你\n很多時候\n都會先幫別人思考' },
+
+  { img:'./asset/page6.png',
+    title:'',
+    text:'也很喜歡你\n日常的撒嬌跟傲嬌\n能夠感受到\n你很享受在關係中' },
+
+  { img:'./asset/page7.png',
+    title:'',
+    text:'這一個月\n慢慢的\n發給你的 reels 越來越多的時候\n\n也發現了\n你慢慢變成\n我想分享快樂的第一順位' },
+
+  { title:'',
+    text:'我很喜歡\n跟喜歡的人\n抱抱 親親\n隨時隨地貼貼\n\n我回去的時候\n你知道要怎麼做了吧' },
+
+  { cls:'final',
+    photoOnly:true,
+    img:'./asset/final.png',
+    title:'',
+    text:'學長\n底迪\n儒儒\n\n生日快樂 🎂' }
+];
+
+/* ---------------- 建立書本 ---------------- */
+const stage = document.getElementById('stage');
+const dotsWrap = document.getElementById('dots');
+let current = 0;
+const total = pages.length;
+const playedPages = new Set();
+
+pages.forEach((p, i)=>{
+  const pageEl = document.createElement('div');
+  pageEl.className='page';
+  pageEl.style.zIndex = total - i;
+
+  const bodyHtml = p.photoOnly
+    ? `<img class="page-photo" src="${p.img}" alt="">
+       ${p.cls==='final'? `<button class="replay replay-floating" id="replayBtn">再翻一次 ↺</button>`:''}`
+    : p.img
+    ? `<img class="page-photo" src="${p.img}" alt="">
+       <div class="photo-caption">
+         ${p.title? `<div class="ptitle">${handwriteHTML(p.title)}</div>`:''}
+         <div class="ptext">${handwriteHTML(p.text)}</div>
+         ${p.cls==='final'? `<button class="replay" id="replayBtn">再翻一次 ↺</button>`:''}
+       </div>`
+    : p.big
+    ? `<div class="big-line1">${handwriteHTML(p.big[0])}</div>
+       <div class="big-line2">${handwriteHTML(p.big[1])}</div>`
+    : `${p.doodle? `<svg class="corner-mark" viewBox="0 0 100 100" style="filter:url(#pencil)">
+         <circle cx="50" cy="50" r="30" stroke="var(--ink)" stroke-width="6" fill="none"/>
+       </svg>
+       <svg class="doodle" viewBox="0 0 100 100" style="filter:url(#pencil)">${p.doodle}</svg>` : ''}
+       ${p.title? `<div class="ptitle">${handwriteHTML(p.title)}</div>`:''}
+       <div class="ptext">${handwriteHTML(p.text)}</div>`;
+
+  pageEl.innerHTML = `
+    <div class="face front ${p.cls||''} ${p.img? 'has-photo':''}">
+      ${bodyHtml}
+      ${i<total-1? `<div class="pnum">${i+1} / ${total}</div>`:''}
+      ${(p.cls==='final' && !p.img)? `<button class="replay" id="replayBtn">再翻一次 ↺</button>`:''}
+    </div>
+    <div class="face back"></div>
+  `;
+  stage.appendChild(pageEl);
+
+  const dot = document.createElement('span');
+  if(i===0) dot.className='active';
+  dotsWrap.appendChild(dot);
+});
+
+const pageEls = [...document.querySelectorAll('.page')];
+const dotEls = [...document.querySelectorAll('#dots span')];
+
+function updateDots(){ dotEls.forEach((d,i)=> d.classList.toggle('active', i===current)); }
+
+function activatePage(idx){
+  if(playedPages.has(idx)) return;
+  playedPages.add(idx);
+  pageEls[idx].querySelectorAll('.ptitle,.ptext,.big-line1,.big-line2').forEach(t=> t.classList.add('go'));
+}
+
+function goNext(){
+  if(current < total-1){
+    pageEls[current].style.transform='rotateY(-180deg)';
+    pageEls[current].style.zIndex = 1;
+    current++;
+    updateDots();
+    activatePage(current);
+  }
+}
+function goPrev(){
+  if(current > 0){
+    current--;
+    pageEls[current].style.transform='rotateY(0deg)';
+    pageEls[current].style.zIndex = total - current;
+    updateDots();
+  }
+}
+
+stage.addEventListener('click', (e)=>{
+  const rect = stage.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  if(x > rect.width/2){ goNext(); } else { goPrev(); }
+});
+
+let touchStartX=null;
+stage.addEventListener('touchstart', e=>{ touchStartX = e.touches[0].clientX; });
+stage.addEventListener('touchend', e=>{
+  if(touchStartX===null) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if(dx < -40) goNext();
+  else if(dx > 40) goPrev();
+  touchStartX=null;
+});
+
+document.addEventListener('click', (e)=>{
+  if(e.target && e.target.id==='replayBtn'){
+    e.stopPropagation();
+    pageEls.forEach((el,i)=>{ el.style.transform='rotateY(0deg)'; el.style.zIndex = total-i; });
+    current = 0;
+    updateDots();
+  }
+});
+
+function launchConfetti(){
+  const wrap = document.createElement('div');
+  wrap.className='confetti';
+  const emojis=['🎉','🎈','💛','✨','🍰'];
+  for(let i=0;i<26;i++){
+    const s = document.createElement('i');
+    s.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    s.style.left = Math.random()*100+'%';
+    s.style.animationDuration = (3+Math.random()*2.5)+'s';
+    s.style.animationDelay = (Math.random()*1.2)+'s';
+    wrap.appendChild(s);
+  }
+  document.body.appendChild(wrap);
+  setTimeout(()=> wrap.remove(), 7000);
+}
+</script>
+</body>
+</html>
