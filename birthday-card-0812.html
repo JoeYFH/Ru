@@ -56,6 +56,7 @@
   .countdown .lbl{font-size:.68rem;color:var(--ink-soft);margin-top:2px;}
 
   .lock-note{font-family:'Noto Sans TC',sans-serif;font-size:.8rem;color:var(--ink-soft);opacity:.75;max-width:260px;line-height:1.6;margin-bottom:6px;}
+  .lock-note-time{font-weight:600;color:var(--ink);margin-top:2px;}
 
   #arrival{display:none;flex-direction:column;align-items:center;margin-bottom:10px;}
   .arrived-text{font-family:'Caveat','Noto Sans TC',sans-serif;font-size:2rem;color:var(--coral);margin-top:8px;}
@@ -234,11 +235,14 @@
 
 <!-- ============ LOCK / MAIL SCREEN ============ -->
 <div id="lock">
-  <div class="lock-sub" id="lockSub">距離可以開啟倒數</div>
+  <div class="lock-sub" id="lockSub">開啟倒數</div>
 
   <div class="countdown" id="countdown"></div>
 
-  <div class="lock-note" id="lockNote">此封信件只能在 8/12 的晚上 10:26 之後才能打開</div>
+  <div class="lock-note" id="lockNote">
+    <div>可以開啟時間</div>
+    <div class="lock-note-time">台灣時間 2026/8/12 10:26 PM</div>
+  </div>
 
   <div id="arrival">
     <div class="arrived-text">時間到了！</div>
