@@ -55,6 +55,8 @@
   .countdown .num{font-family:'Caveat',cursive;font-weight:700;font-size:2.4rem;color:var(--ink);line-height:1;}
   .countdown .lbl{font-size:.68rem;color:var(--ink-soft);margin-top:2px;}
 
+  .lock-note{font-family:'Noto Sans TC',sans-serif;font-size:.8rem;color:var(--ink-soft);opacity:.75;max-width:260px;line-height:1.6;margin-bottom:6px;}
+
   #arrival{display:none;flex-direction:column;align-items:center;margin-bottom:10px;}
   .arrived-text{font-family:'Caveat','Noto Sans TC',sans-serif;font-size:2rem;color:var(--coral);margin-top:8px;}
 
@@ -122,7 +124,8 @@
 
   /* 照片頁 */
   .face.has-photo{padding:0;}
-  .page-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:13px;}
+  .page-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:13px;opacity:0;transition:opacity 1s ease;}
+  .page-photo.go{opacity:1;}
   .photo-caption{
     position:absolute;left:0;right:0;bottom:0;
     padding:26px 22px 24px;
@@ -191,7 +194,7 @@
     background:rgba(74,66,56,.25);border-radius:4px;outline:none;
     opacity:0;pointer-events:none;transition:opacity .4s ease;
   }
-  #volumeSlider.show{opacity:1;pointer-events:auto;}
+  #volumeSlider.expanded{opacity:1;pointer-events:auto;}
   #volumeSlider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--coral);cursor:pointer;}
   #volumeSlider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--coral);border:none;cursor:pointer;}
 
@@ -227,6 +230,8 @@
   <div class="lock-sub" id="lockSub">還沒到時間喔</div>
 
   <div class="countdown" id="countdown"></div>
+
+  <div class="lock-note" id="lockNote">此封信件只能在 8/12 的晚上 10:26 之後才能打開</div>
 
   <div id="arrival">
     <div class="arrived-text">時間到了！</div>
@@ -273,12 +278,16 @@
   跟這個 html 檔同一個資料夾裡的 quiz.txt、wrong-answers.txt、marquee-text.txt
   可以直接編輯內容，格式說明請看檔案裡的範例。
   這三個檔案如果讀不到或是空的，問答關卡會直接略過、跑馬燈也不會顯示，其他功能不受影響。
+
+  提前拆信開關：
+  同資料夾裡的 preview-switch.txt 寫 ON 才能連點音量鍵 5 下提前拆信，
+  寫 OFF 就會停用這個功能，正式寄出前記得改成 OFF。
 -->
 <audio id="bgm" src="BGM.mp3" loop preload="auto"></audio>
 
 <script>
 /* ---------------- 日期鎖定 ---------------- */
-const target = new Date('2026-08-12T00:00:00+08:00').getTime();
+const target = new Date('2026-08-12T22:26:00+08:00').getTime();
 let arrived = false;
 let openedDate = null;
 
@@ -306,6 +315,7 @@ function triggerArrival(){
   arrived = true;
   document.getElementById('countdown').style.display='none';
   document.getElementById('lockSub').style.display='none';
+  document.getElementById('lockNote').style.display='none';
   document.getElementById('arrival').style.display='flex';
   setTimeout(()=>{ document.getElementById('unlockBtn').style.display='inline-block'; }, 500);
 }
@@ -319,6 +329,7 @@ function enterPreview(){
   arrived = true;
   document.getElementById('countdown').style.display='none';
   document.getElementById('lockSub').style.display='none';
+  document.getElementById('lockNote').style.display='none';
   document.getElementById('unlockBtn').textContent = '提 前 拆 開';
   document.getElementById('unlockBtn').style.display='inline-block';
 }
@@ -432,6 +443,13 @@ document.getElementById('quizInput').addEventListener('keydown', e=>{
   if(e.key==='Enter') submitQuizAnswer();
 });
 
+/* ---------------- 提前拆信開關 ---------------- */
+let previewSwitchOn = false;
+const previewSwitchReady = fetch('./preview-switch.txt').then(r=> r.ok? r.text() : '').catch(()=> '').then(text=>{
+  const line = text.split(/\r?\n/).map(l=> l.trim()).find(l=> l && !l.startsWith('#'));
+  previewSwitchOn = (line || '').toUpperCase() === 'ON';
+});
+
 /* ---------------- 跑馬燈 ---------------- */
 fetch('./marquee-text.txt').then(r=> r.ok? r.text() : '').catch(()=> '').then(text=>{
   const lines = text.split(/\r?\n/).map(l=> l.trim()).filter(l=> l && !l.startsWith('#'));
@@ -450,9 +468,8 @@ bgm.volume = parseFloat(volumeSlider.value);
 bgm.addEventListener('canplaythrough', ()=>{
   bgmReady = true;
   soundBtn.classList.add('show');
-  volumeSlider.classList.add('show');
 }, {once:true});
-bgm.addEventListener('error', ()=>{ soundBtn.classList.remove('show'); volumeSlider.classList.remove('show'); });
+bgm.addEventListener('error', ()=>{ soundBtn.classList.remove('show'); volumeSlider.classList.remove('expanded'); });
 
 volumeSlider.addEventListener('input', (e)=>{
   e.stopPropagation();
@@ -463,10 +480,14 @@ volumeSlider.addEventListener('click', e=> e.stopPropagation());
 function playBgm(){
   bgm.play().then(()=>{
     soundBtn.classList.add('show');
-    volumeSlider.classList.add('show');
     setSoundIcon(true);
   }).catch(()=>{ /* 檔案不存在或瀏覽器擋自動播放，忽略即可 */ });
 }
+
+/* 瀏覽器大多禁止網頁一載入就自動有聲音播放，
+   所以改成鎖定畫面上第一次點擊/觸碰就馬上播放，讓音樂在拆信前就先響起 */
+document.addEventListener('click', playBgm, {once:true});
+document.addEventListener('touchstart', playBgm, {once:true});
 
 function setSoundIcon(playing){
   document.getElementById('wave1').style.display = playing? '' : 'none';
@@ -478,11 +499,21 @@ soundBtn.addEventListener('click', (e)=>{
   e.stopPropagation();
   if(bgm.paused){ bgm.play(); setSoundIcon(true); }
   else { bgm.pause(); setSoundIcon(false); }
+  volumeSlider.classList.toggle('expanded');
 
   tapCount++;
   clearTimeout(tapTimer);
   tapTimer=setTimeout(()=>{tapCount=0;},1500);
-  if(tapCount>=5){ tapCount=0; enterPreview(); }
+  if(tapCount>=5){
+    tapCount=0;
+    previewSwitchReady.then(()=>{ if(previewSwitchOn) enterPreview(); });
+  }
+});
+
+document.addEventListener('click', (e)=>{
+  if(e.target!==soundBtn && e.target!==volumeSlider && !soundBtn.contains(e.target)){
+    volumeSlider.classList.remove('expanded');
+  }
 });
 
 /* ---------------- 手寫動畫工具 ---------------- */
@@ -607,7 +638,7 @@ function updateDots(){ dotEls.forEach((d,i)=> d.classList.toggle('active', i===c
 function activatePage(idx){
   if(playedPages.has(idx)) return;
   playedPages.add(idx);
-  pageEls[idx].querySelectorAll('.ptitle,.ptext,.big-line1,.big-line2').forEach(t=> t.classList.add('go'));
+  pageEls[idx].querySelectorAll('.ptitle,.ptext,.big-line1,.big-line2,.page-photo').forEach(t=> t.classList.add('go'));
   if(idx === total-1){
     const stampDate = pageEls[idx].querySelector('#stampDate');
     const stampMark = pageEls[idx].querySelector('#stampMark');
