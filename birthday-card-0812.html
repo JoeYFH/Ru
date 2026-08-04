@@ -484,8 +484,10 @@ function playBgm(){
   }).catch(()=>{ /* 檔案不存在或瀏覽器擋自動播放，忽略即可 */ });
 }
 
-/* 瀏覽器大多禁止網頁一載入就自動有聲音播放，
-   所以改成鎖定畫面上第一次點擊/觸碰就馬上播放，讓音樂在拆信前就先響起 */
+/* 網頁一打開就直接當背景音樂播放，不用等拆信或時間到。
+   瀏覽器大多禁止網頁一載入就自動有聲音播放，所以這裡先直接嘗試播放，
+   如果被瀏覽器擋下來，就退而求其次改成第一次點擊/觸碰畫面時馬上播放。 */
+playBgm();
 document.addEventListener('click', playBgm, {once:true});
 document.addEventListener('touchstart', playBgm, {once:true});
 
