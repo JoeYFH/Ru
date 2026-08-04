@@ -216,11 +216,12 @@
     mask-image:linear-gradient(to right, transparent 0, #000 14%, #000 86%, transparent 100%);
   }
   #marquee.show{opacity:1;}
-  #marquee .track{display:flex;white-space:nowrap;animation:marqueeScroll 22s linear infinite;}
+  #marquee .track{display:flex;white-space:nowrap;}
+  #marquee .track.run{animation:marqueeScroll 22s linear infinite;}
   #marquee .track span{padding-right:48px;font-family:'Caveat','Noto Sans TC',sans-serif;font-size:.8rem;color:var(--ink-soft);}
   @keyframes marqueeScroll{
     from{transform:translateX(0);}
-    to{transform:translateX(-50%);}
+    to{transform:translateX(var(--marquee-shift, -50%));}
   }
 </style>
 </head>
@@ -470,7 +471,13 @@ const previewSwitchReady = fetch('./preview-switch.txt').then(r=> r.ok? r.text()
 fetch('./marquee-text.txt').then(r=> r.ok? r.text() : '').catch(()=> '').then(text=>{
   const lines = text.split(/\r?\n/).map(l=> l.trim()).filter(l=> l && !l.startsWith('#'));
   const content = lines.length? lines.join('　★　') : '生日快樂　儒儒';
-  document.getElementById('marqueeTrack').innerHTML = '<span>'+content+'</span><span>'+content+'</span>';
+  const track = document.getElementById('marqueeTrack');
+  track.innerHTML = '<span>'+content+'</span><span>'+content+'</span>';
+  requestAnimationFrame(()=>{
+    const half = track.scrollWidth/2;
+    track.style.setProperty('--marquee-shift', '-'+half+'px');
+    track.classList.add('run');
+  });
 });
 
 /* ---------------- 背景音樂 ---------------- */
