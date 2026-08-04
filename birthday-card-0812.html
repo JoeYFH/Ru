@@ -315,14 +315,6 @@ function enterPreview(){
 const urlParams = new URLSearchParams(location.search);
 if(urlParams.get('preview')==='1'){ enterPreview(); }
 
-let tapCount=0, tapTimer=null;
-document.getElementById('lockTitle').addEventListener('click', ()=>{
-  tapCount++;
-  clearTimeout(tapTimer);
-  tapTimer=setTimeout(()=>{tapCount=0;},1500);
-  if(tapCount>=5){ tapCount=0; enterPreview(); }
-});
-
 document.getElementById('unlockBtn').addEventListener('click', ()=>{
   openedDate = new Date();
   document.getElementById('lock').classList.add('hide');
@@ -458,10 +450,16 @@ function setSoundIcon(playing){
   document.getElementById('wave2').style.display = playing? '' : 'none';
 }
 
+let tapCount=0, tapTimer=null;
 soundBtn.addEventListener('click', (e)=>{
   e.stopPropagation();
   if(bgm.paused){ bgm.play(); setSoundIcon(true); }
   else { bgm.pause(); setSoundIcon(false); }
+
+  tapCount++;
+  clearTimeout(tapTimer);
+  tapTimer=setTimeout(()=>{tapCount=0;},1500);
+  if(tapCount>=5){ tapCount=0; enterPreview(); }
 });
 
 /* ---------------- 手寫動畫工具 ---------------- */
