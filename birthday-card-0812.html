@@ -100,6 +100,11 @@
     60%{transform:translateX(-6px);}
     80%{transform:translateX(6px);}
   }
+  .quiz-q-in{animation:quizQIn .45s ease;}
+  @keyframes quizQIn{
+    from{opacity:0;transform:translateY(14px);}
+    to{opacity:1;transform:translateY(0);}
+  }
 
   /* ---------- BOOK ---------- */
   #book-wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .5s ease;}
@@ -401,9 +406,14 @@ const quizReady = Promise.all([
 
 function renderQuizQuestion(){
   document.getElementById('quizProgress').textContent = '第 '+(quizIndex+1)+' / '+quizData.length+' 題';
-  document.getElementById('quizQ').textContent = quizData[quizIndex].q;
   document.getElementById('quizInput').value = '';
   document.getElementById('quizWrong').classList.remove('show');
+
+  const qEl = document.getElementById('quizQ');
+  qEl.textContent = quizData[quizIndex].q;
+  qEl.classList.remove('quiz-q-in');
+  void qEl.offsetWidth;
+  qEl.classList.add('quiz-q-in');
 }
 
 function startQuiz(){
