@@ -130,7 +130,7 @@
 
   /* 照片頁 */
   .face.has-photo{padding:0;}
-  .page-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:13px;opacity:0;transition:opacity 1s ease;}
+  .page-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;border-radius:13px;opacity:0;transition:opacity 1s ease;}
   .page-photo.go{opacity:1;}
   .photo-caption{
     position:absolute;left:0;right:0;bottom:0;
@@ -209,7 +209,7 @@
   /* ---------- 跑馬燈 ---------- */
   #marquee{
     position:fixed;left:50%;bottom:0;transform:translateX(-50%);
-    width:min(92vw,420px);height:30px;z-index:65;
+    width:min(92vw,420px);height:22px;z-index:65;
     overflow:hidden;display:flex;align-items:center;
     opacity:0;pointer-events:none;transition:opacity .5s ease;
     -webkit-mask-image:linear-gradient(to right, transparent 0, #000 14%, #000 86%, transparent 100%);
@@ -218,7 +218,7 @@
   #marquee.show{opacity:1;}
   #marquee .track{display:flex;white-space:nowrap;}
   #marquee .track.run{animation:marqueeScroll 22s linear infinite;}
-  #marquee .track span{padding-right:48px;font-family:'Caveat','Noto Sans TC',sans-serif;font-size:.8rem;color:var(--ink-soft);}
+  #marquee .track span{padding-right:48px;font-family:'Caveat','Noto Sans TC',sans-serif;font-size:.65rem;color:var(--ink-soft);}
   @keyframes marqueeScroll{
     from{transform:translateX(0);}
     to{transform:translateX(var(--marquee-shift, -50%));}
@@ -485,6 +485,12 @@ const bgm = document.getElementById('bgm');
 const soundBtn = document.getElementById('soundBtn');
 const volumeSlider = document.getElementById('volumeSlider');
 let bgmReady = false;
+
+/* iOS（iPhone/iPad）的 Safari 不允許網頁用 JS 控制音量，
+   音量固定要用手機實體音量鍵調整，網頁上的滑桿在 iOS 上完全沒有作用，
+   所以在 iOS 上直接把滑桿隱藏，避免看起來像壞掉 */
+const isIOS = /iP(hone|od|ad)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+if(isIOS){ volumeSlider.style.display = 'none'; }
 
 bgm.volume = parseFloat(volumeSlider.value);
 
