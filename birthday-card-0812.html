@@ -173,18 +173,6 @@
     text-decoration:none;color:#FBF6EC;
   }
 
-  /* 拆封印章 */
-  .stamp{
-    position:absolute;top:22px;right:20px;
-    padding:8px 14px;border:2px solid rgba(74,66,56,.85);border-radius:8px;
-    text-align:center;color:var(--ink);text-shadow:0 1px 4px rgba(251,246,236,.6);
-    transform:scale(1.7) rotate(-11deg);opacity:0;
-    transition:transform .6s cubic-bezier(.34,1.56,.64,1), opacity .45s ease;
-    pointer-events:none;
-  }
-  .stamp.show{opacity:.92;transform:scale(1) rotate(-8deg);}
-  .stamp-line2{font-family:'Caveat',cursive;font-weight:700;font-size:1.35rem;letter-spacing:.03em;}
-
   #soundBtn{
     position:fixed;right:18px;top:18px;z-index:70;
     width:44px;height:44px;border-radius:50%;
@@ -303,10 +291,8 @@
 /* ---------------- 日期鎖定 ---------------- */
 const target = new Date('2026-08-12T22:26:00+08:00').getTime();
 let arrived = false;
-let openedDate = null;
 
 function pad(n){return n.toString().padStart(2,'0');}
-function formatOpenedDate(d){ return d.getFullYear()+' . '+pad(d.getMonth()+1)+' . '+pad(d.getDate()); }
 
 function renderCountdown(){
   if(arrived) return;
@@ -353,7 +339,6 @@ const urlParams = new URLSearchParams(location.search);
 if(urlParams.get('preview')==='1'){ enterPreview(); }
 
 document.getElementById('unlockBtn').addEventListener('click', ()=>{
-  openedDate = new Date();
   document.getElementById('lock').classList.add('hide');
   setTimeout(()=>{
     document.getElementById('lock').style.display='none';
@@ -620,8 +605,7 @@ pages.forEach((p, i)=>{
     ? ``
     : p.photoOnly
     ? `<img class="page-photo" src="${p.img}" alt="">
-       ${p.cls==='final'? `<div class="stamp" id="stampMark"><div class="stamp-line2" id="stampDate"></div></div>
-       <button class="replay replay-floating" id="replayBtn">再翻一次 ↺</button>`:''}`
+       ${p.cls==='final'? `<button class="replay replay-floating" id="replayBtn">再翻一次 ↺</button>`:''}`
     : p.img
     ? `<img class="page-photo" src="${p.img}" alt="">
        <div class="photo-caption">
@@ -663,12 +647,6 @@ function activatePage(idx){
   if(playedPages.has(idx)) return;
   playedPages.add(idx);
   pageEls[idx].querySelectorAll('.ptitle,.ptext,.big-line1,.big-line2,.page-photo').forEach(t=> t.classList.add('go'));
-  if(idx === total-1){
-    const stampDate = pageEls[idx].querySelector('#stampDate');
-    const stampMark = pageEls[idx].querySelector('#stampMark');
-    if(stampDate) stampDate.textContent = formatOpenedDate(openedDate || new Date());
-    if(stampMark) setTimeout(()=> stampMark.classList.add('show'), 500);
-  }
 }
 
 function goNext(){
