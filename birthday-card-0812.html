@@ -110,7 +110,7 @@
   /* ---------- BOOK ---------- */
   #book-wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .5s ease;}
   #book-wrap.show{opacity:1;visibility:visible;}
-  #stage{position:relative;width:min(92vw,420px);height:min(78vh,620px);perspective:2200px;}
+  #stage{position:relative;width:min(92vw,420px,62.4vh);aspect-ratio:4/5;perspective:2200px;}
   .page{position:absolute;inset:0;transform-origin:left center;transform-style:preserve-3d;transition:transform .85s cubic-bezier(.45,.05,.2,1);will-change:transform;}
   .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;background:var(--paper);
     box-shadow:0 10px 30px rgba(74,66,56,.18), 0 2px 0 rgba(74,66,56,.05) inset;
@@ -184,7 +184,7 @@
   .stamp-line2{font-family:'Caveat',cursive;font-weight:700;font-size:1.35rem;letter-spacing:.03em;}
 
   #soundBtn{
-    position:fixed;left:18px;bottom:46px;z-index:70;
+    position:fixed;right:18px;top:18px;z-index:70;
     width:44px;height:44px;border-radius:50%;
     background:var(--paper);border:1px solid rgba(74,66,56,.15);
     box-shadow:0 4px 14px rgba(74,66,56,.18);
@@ -195,7 +195,7 @@
   #soundBtn svg{width:22px;height:22px;color:var(--ink);}
 
   #volumeSlider{
-    position:fixed;left:38px;bottom:100px;z-index:70;
+    position:fixed;right:38px;top:72px;z-index:70;
     width:4px;height:100px;
     writing-mode:vertical-lr;direction:rtl;
     -webkit-appearance:slider-vertical;appearance:none;
@@ -336,9 +336,11 @@ function triggerArrival(){
    方法一：網址後面加上 ?preview=1
    方法二：連續點音量鍵 5 下
 ------------------------------------------------------------ */
+let isPreviewUnlock = false;
 function enterPreview(){
   if(arrived) return;
   arrived = true;
+  isPreviewUnlock = true;
   document.getElementById('countdown').style.display='none';
   document.getElementById('lockSub').style.display='none';
   document.getElementById('lockNote').style.display='none';
@@ -353,7 +355,7 @@ document.getElementById('unlockBtn').addEventListener('click', ()=>{
   document.getElementById('lock').classList.add('hide');
   setTimeout(()=>{
     document.getElementById('lock').style.display='none';
-    startQuiz();
+    if(isPreviewUnlock){ enterBook(); } else { startQuiz(); }
   },600);
 });
 
