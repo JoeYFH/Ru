@@ -473,7 +473,6 @@ fetch('./marquee-text.txt').then(r=> r.ok? r.text() : '').catch(()=> '').then(te
 const bgm = document.getElementById('bgm');
 const soundBtn = document.getElementById('soundBtn');
 const volumeSlider = document.getElementById('volumeSlider');
-let bgmReady = false;
 
 /* iOS（iPhone/iPad）的 Safari 不允許網頁用 JS 控制音量，
    音量固定要用手機實體音量鍵調整，網頁上的滑桿在 iOS 上完全沒有作用，
@@ -483,10 +482,10 @@ if(isIOS){ volumeSlider.style.display = 'none'; }
 
 bgm.volume = parseFloat(volumeSlider.value);
 
-bgm.addEventListener('canplaythrough', ()=>{
-  bgmReady = true;
-  soundBtn.classList.add('show');
-}, {once:true});
+/* 音量鍵一開始就要能點（連點 5 下才能提前拆信），
+   不能等音樂真的準備好才顯示，不然手機上第一下點擊常常會先被拿去當作「喚醒音樂」的手勢，
+   導致點 5 下都點不滿。只有真的沒有 BGM.mp3 檔案時才隱藏。 */
+soundBtn.classList.add('show');
 bgm.addEventListener('error', ()=>{ soundBtn.classList.remove('show'); volumeSlider.classList.remove('expanded'); });
 
 volumeSlider.addEventListener('input', (e)=>{
