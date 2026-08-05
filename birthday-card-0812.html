@@ -165,7 +165,7 @@
   .confetti i{position:absolute;top:-20px;font-size:1.1rem;animation:fall linear forwards;opacity:.85;}
   @keyframes fall{to{transform:translateY(110vh) rotate(300deg);opacity:.2;}}
 
-  .replay{margin-top:16px;font-family:'Caveat','Noto Sans TC',sans-serif;font-size:1.15rem;color:var(--blue);background:none;border:none;text-decoration:underline;cursor:pointer;}
+  .replay{margin-top:16px;font-family:'Caveat','Noto Sans TC',sans-serif;font-size:.9rem;color:var(--blue);background:none;border:none;text-decoration:underline;cursor:pointer;}
   .photo-caption .replay{color:#FBF6EC;}
   .replay-floating{
     position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
@@ -183,7 +183,6 @@
     pointer-events:none;
   }
   .stamp.show{opacity:.92;transform:scale(1) rotate(-8deg);}
-  .stamp-line1{font-family:'Caveat','Noto Sans TC',sans-serif;font-size:1rem;letter-spacing:.2em;margin-bottom:2px;}
   .stamp-line2{font-family:'Caveat',cursive;font-weight:700;font-size:1.35rem;letter-spacing:.03em;}
 
   #soundBtn{
@@ -621,7 +620,7 @@ pages.forEach((p, i)=>{
     ? ``
     : p.photoOnly
     ? `<img class="page-photo" src="${p.img}" alt="">
-       ${p.cls==='final'? `<div class="stamp" id="stampMark"><div class="stamp-line1">已拆封</div><div class="stamp-line2" id="stampDate"></div></div>
+       ${p.cls==='final'? `<div class="stamp" id="stampMark"><div class="stamp-line2" id="stampDate"></div></div>
        <button class="replay replay-floating" id="replayBtn">再翻一次 ↺</button>`:''}`
     : p.img
     ? `<img class="page-photo" src="${p.img}" alt="">
