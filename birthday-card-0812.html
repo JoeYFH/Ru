@@ -281,16 +281,41 @@
   可以直接編輯內容，格式說明請看檔案裡的範例。
   這三個檔案如果讀不到或是空的，問答關卡會直接略過、跑馬燈也不會顯示，其他功能不受影響。
 
-  提前拆信開關：
-  同資料夾裡的 preview-switch.txt 寫 ON 才能連點音量鍵 5 下提前拆信，
-  寫 OFF 就會停用這個功能，正式寄出前記得改成 OFF。
+  開啟時間 / 提前拆信開關：
+  同資料夾裡的 preview-switch.txt 可以設定：
+  - OPEN_TIME: 2026-08-12 22:26　→ 調整倒數的開啟時間（台灣時間，24 小時制）
+  - PREVIEW: ON 或 OFF　→ 是否允許連點音量鍵 5 下提前拆信（正式寄出前記得改成 OFF）
+  這個檔案讀不到或格式錯誤時，會自動用內建的預設開啟時間，其他功能不受影響。
 -->
 <audio id="bgm" src="BGM.mp3" loop preload="auto"></audio>
 
 <script>
 /* ---------------- 日期鎖定 ---------------- */
-const target = new Date('2026-08-12T22:26:00+08:00').getTime();
+/* 預設開啟時間，會被 preview-switch.txt 裡的 OPEN_TIME 設定覆蓋（讀不到或格式錯誤才用這個） */
+let target = new Date('2026-08-12T22:26:00+08:00').getTime();
 let arrived = false;
+
+/* 把 "2026-08-12 22:26" 這種格式的文字轉成時間戳記，並產生對應的顯示文字 */
+function parseOpenTime(text){
+  const m = (text||'').trim().match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})[ T](\d{1,2}):(\d{2})/);
+  if(!m) return null;
+  const [y, mo, d, h, mi] = m.slice(1).map(Number);
+  const iso = y+'-'+pad(mo)+'-'+pad(d)+'T'+pad(h)+':'+pad(mi)+':00+08:00';
+  const ts = new Date(iso).getTime();
+  if(isNaN(ts)) return null;
+  const hour12 = (h%12)||12;
+  const ampm = h<12 ? 'AM':'PM';
+  const display = '台灣時間 '+y+'/'+mo+'/'+d+' '+hour12+':'+pad(mi)+' '+ampm;
+  return {ts, display};
+}
+
+function applyOpenTime(text){
+  const parsed = parseOpenTime(text);
+  if(!parsed) return;
+  target = parsed.ts;
+  const noteTimeEl = document.querySelector('.lock-note-time');
+  if(noteTimeEl) noteTimeEl.textContent = parsed.display;
+}
 
 function pad(n){return n.toString().padStart(2,'0');}
 
@@ -449,11 +474,20 @@ document.getElementById('quizInput').addEventListener('keydown', e=>{
   if(e.key==='Enter') submitQuizAnswer();
 });
 
-/* ---------------- 提前拆信開關 ---------------- */
+/* ---------------- 開啟時間 / 提前拆信開關 ---------------- */
 let previewSwitchOn = false;
 const previewSwitchReady = fetch('./preview-switch.txt').then(r=> r.ok? r.text() : '').catch(()=> '').then(text=>{
-  const line = text.split(/\r?\n/).map(l=> l.trim()).find(l=> l && !l.startsWith('#'));
-  previewSwitchOn = (line || '').toUpperCase() === 'ON';
+  const lines = text.split(/\r?\n/).map(l=> l.trim()).filter(l=> l && !l.startsWith('#'));
+
+  const openTimeLine = lines.find(l=> /^OPEN_TIME\s*[:：]/i.test(l));
+  if(openTimeLine){
+    applyOpenTime(openTimeLine.replace(/^OPEN_TIME\s*[:：]\s*/i,''));
+  }
+
+  const previewLine = lines.find(l=> /^PREVIEW\s*[:：]/i.test(l))
+    || lines.find(l=> /^(ON|OFF)$/i.test(l)); // 相容舊格式（沒有 PREVIEW: 前綴，只單獨寫 ON/OFF）
+  const previewValue = previewLine ? previewLine.replace(/^PREVIEW\s*[:：]\s*/i,'') : '';
+  previewSwitchOn = previewValue.toUpperCase() === 'ON';
 });
 
 /* ---------------- 跑馬燈 ---------------- */
