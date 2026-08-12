@@ -288,10 +288,12 @@
   - OPEN_TIME: 2026-08-12 22:26　→ 調整倒數的開啟時間（台灣時間，24 小時制）
   - PREVIEW: ON 或 OFF　→ 是否允許連點音量鍵 5 下提前拆信（正式寄出前記得改成 OFF）
 
-  拆信紀錄（時間 + 裝置）：
-  對方真正拆信（不是提前拆信測試模式）時，會自動寄一封信到 joehuangyf@gmail.com，
-  內容是拆信時間跟裝置資訊（不含地點）。用的是免註冊的 FormSubmit 表單轉寄信服務，
-  第一次要先到信箱點擊 FormSubmit 寄來的啟用連結，之後才會自動生效。
+  拆信紀錄（時間 + 裝置 + IP/大概城市）：
+  1. 對方真正拆信（不是提前拆信測試模式）時，會自動寄一封信到 joehuangyf@gmail.com，
+     內容是拆信時間、裝置資訊、IP 位址跟大概城市/國家（不用跳授權視窗，只能抓到大概位置）。
+  2. 問答關卡答錯時，也會寄一封信，內容包含答錯的題目跟對方輸入的答案。
+  用的是免註冊的 FormSubmit 表單轉寄信服務 + ipapi.co 查 IP 服務，
+  FormSubmit 第一次要先到信箱點擊寄來的啟用連結，之後才會自動生效。
   這個檔案讀不到或格式錯誤時，會自動用內建的預設開啟時間，其他功能不受影響。
 -->
 <audio id="bgm" src="BGM.mp3" loop preload="auto"></audio>
@@ -387,28 +389,60 @@ function enterBook(){
   if(!isPreviewUnlock) logOpenEvent();
 }
 
-/* ---------------- 拆信紀錄（時間 + 裝置，不含地點） ----------------
-   只在真正拆信（不是提前拆信的測試模式）的時候記錄一次，
-   透過 FormSubmit（免註冊的表單轉寄信服務）寄一封信到 joehuangyf@gmail.com。
-   第一次使用需要先到信箱點擊 FormSubmit 寄來的啟用連結，之後才會自動寄信。
-   如果寄送失敗（例如沒有網路），就直接忽略，不影響對方看信。
+/* ---------------- 拆信紀錄（時間 + 裝置 + IP/大概城市） ----------------
+   1. 真正拆信（不是提前拆信的測試模式）時記錄一次
+   2. 問答關卡答錯時，每一次都記錄
+   透過 FormSubmit（免註冊的表單轉寄信服務）寄一封信到 joehuangyf@gmail.com，
+   IP / 大概城市則是用 ipapi.co 這個免費、不用跳授權視窗的查詢服務。
+   第一次使用 FormSubmit 需要先到信箱點擊寄來的啟用連結，之後才會自動寄信。
+   如果查詢或寄送失敗（例如沒有網路），就直接忽略，不影響對方看信。
 ------------------------------------------------------------ */
+function getIpInfo(){
+  return fetch('https://ipapi.co/json/')
+    .then(r=> r.ok? r.json() : null)
+    .then(data=>{
+      if(!data || !data.ip) return '（IP 查詢失敗）';
+      const loc = [data.city, data.country_name].filter(Boolean).join(', ');
+      return data.ip + (loc? '（'+loc+'）' : '');
+    })
+    .catch(()=> '（IP 查詢失敗）');
+}
+
+function getDeviceInfo(){
+  return navigator.userAgent + ' | 螢幕 ' + screen.width + 'x' + screen.height + ' | 語言 ' + navigator.language;
+}
+
+function getTaipeiTimeStr(){
+  return new Date().toLocaleString('zh-TW', {timeZone:'Asia/Taipei', hour12:false}) + '（台灣時間）';
+}
+
+function sendLogEmail(subject, extraFields){
+  getIpInfo().then(ipInfo=>{
+    fetch('https://formsubmit.co/ajax/joehuangyf@gmail.com', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body: JSON.stringify(Object.assign({
+        _subject: subject,
+        裝置資訊: getDeviceInfo(),
+        IP位址: ipInfo
+      }, extraFields))
+    }).catch(()=>{});
+  });
+}
+
 let openLogged = false;
 function logOpenEvent(){
   if(openLogged) return;
   openLogged = true;
-  const now = new Date();
-  const timeStr = now.toLocaleString('zh-TW', {timeZone:'Asia/Taipei', hour12:false}) + '（台灣時間）';
-  const device = navigator.userAgent + ' | 螢幕 ' + screen.width + 'x' + screen.height + ' | 語言 ' + navigator.language;
-  fetch('https://formsubmit.co/ajax/joehuangyf@gmail.com', {
-    method:'POST',
-    headers:{'Content-Type':'application/json','Accept':'application/json'},
-    body: JSON.stringify({
-      _subject:'儒儒拆信了！',
-      拆信時間: timeStr,
-      裝置資訊: device
-    })
-  }).catch(()=>{});
+  sendLogEmail('儒儒拆信了！', { 拆信時間: getTaipeiTimeStr() });
+}
+
+function logWrongAnswerEvent(questionText, wrongAnswerText){
+  sendLogEmail('儒儒答錯題目了', {
+    時間: getTaipeiTimeStr(),
+    題目: questionText,
+    錯誤答案: wrongAnswerText
+  });
 }
 
 /* ---------------- 開信前問答關卡 ---------------- */
@@ -490,6 +524,7 @@ function submitQuizAnswer(){
       renderQuizQuestion();
     }
   } else {
+    logWrongAnswerEvent(quizData[quizIndex].q, document.getElementById('quizInput').value);
     const msg = wrongMessages[Math.floor(Math.random()*wrongMessages.length)];
     const wrongEl = document.getElementById('quizWrong');
     wrongEl.textContent = msg;
